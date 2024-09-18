@@ -1,0 +1,25 @@
+version: '3.3'
+
+services:
+  helloService:
+    container_name: backend_helloService
+    image: sukhil-learning:my-app
+    command: helloService
+    network_mode: host
+    environment:
+      - PORT=3001
+
+  profileService:
+    container_name: backend_profileService
+    image: sukhil-learning:my-app
+    command: profileService
+    network_mode: host
+    environment:
+      - PORT=3002
+      - MONGO_URL=mongodb+srv://sukhilnair:sukhil123@cluster0.dm4xp4t.mongodb.net/travelmemory
+
+  frontend:
+    container_name: frontend
+    image: sukhil-learning:my-app
+    command: frontend
+    network_mode: host
