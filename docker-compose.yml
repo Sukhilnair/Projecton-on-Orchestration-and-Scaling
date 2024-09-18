@@ -16,7 +16,7 @@ services:
     network_mode: host
     environment:
       - PORT=3002
-      - MONGO_URL=mongodb+srv://sukhilnair:sukhil123@cluster0.dm4xp4t.mongodb.net/travelmemory
+      - MONGO_URL=<MongoDB URI>
 
   frontend:
     container_name: frontend
