@@ -1,0 +1,52 @@
+pipeline {
+    agent any
+
+    environment {
+        GIT_REPO = "https://github.com/Sukhilnair/Projecton-on-Orchestration-and-Scaling.git"
+        ECR_REPO_URI = '015485511962.dkr.ecr.eu-north-1.amazonaws.com/sukhil/mern'
+        AWS_REGION = 'eu-north-1'
+        AWS_CREDENTIALS_ID = 'aws-credentials'
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main', url: "${env.GIT_REPO}"
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh "docker build -t ${env.ECR_REPO_URI}:latest ."
+                }
+            }
+        }
+
+        stage('Login to ECR') {
+            steps {
+                withCredentials([aws(credentialsId: env.AWS_CREDENTIALS_ID)]) {
+                    script {
+                        def loginCommand = sh(script: "aws ecr get-login-password --region ${env.AWS_REGION}", returnStdout: true).trim()
+                        sh "echo ${loginCommand} | docker login --username AWS --password-stdin ${env.ECR_REPO_URI}"
+                    }
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    def imageTag = "${env.ECR_REPO_URI}:latest"
+                    sh "docker push ${imageTag}"
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            sh 'docker system prune -af'
+        }
+    }
+}
