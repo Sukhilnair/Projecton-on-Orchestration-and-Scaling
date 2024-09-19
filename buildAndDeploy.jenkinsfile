@@ -54,7 +54,7 @@ pipeline {
                     script {
                         sh """
                             if ! eksctl get cluster --name ${env.CLUSTER_NAME} --region ${env.AWS_REGION}; then
-                                eksctl create cluster --name ${env.CLUSTER_NAME} --region ${env.AWS_REGION} --nodegroup-name standard-workers --node-type t3.medium --nodes 2 --nodes-min 1 --nodes-max 3 --managed
+                                eksctl create cluster --name ${env.CLUSTER_NAME} --region ${env.AWS_REGION} --nodegroup-name standard-workers --node-type t3.medium --nodes 1 --nodes-min 1 --nodes-max 3 --managed
                             fi
                         """
                     }
@@ -70,7 +70,7 @@ pipeline {
                             aws eks --region ${env.AWS_REGION} update-kubeconfig --name ${env.CLUSTER_NAME}
                             helm repo add stable https://charts.helm.sh/stable
                             helm repo update
-                            helm upgrade --install mern-app ./mernAPP --set image.repository=${env.ECR_REPO_URI}/sukhil/mern,image.tag=latest
+                            helm upgrade --install mern-app ./mernAPP --set helloService.image=${env.ECR_REPO_URI}/sukhil/mern,image.tag=latest --set profileService.image=${env.ECR_REPO_URI}/sukhil/mern,image.tag=latest --set frontend.image=${env.ECR_REPO_URI}/sukhil/mern,image.tag=latest
                         """
                     }
                 }
