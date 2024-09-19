@@ -6,6 +6,7 @@ pipeline {
         ECR_REPO_URI = 'public.ecr.aws/b4e0x1f6'
         AWS_REGION = 'us-east-1'
         AWS_CREDENTIALS_ID = 'aws-credentials'
+        CLUSTER_NAME = 'sukhil-cluster'
     }
 
     stages {
@@ -43,6 +44,35 @@ pipeline {
             steps {
                 script {
                     sh "docker push ${env.ECR_REPO_URI}/sukhil/mern:latest"
+                }
+            }
+        }
+
+        stage('Check / Create EKS Cluster') {
+            steps {
+                withCredentials([aws(credentialsId: env.AWS_CREDENTIALS_ID)]) {
+                    script {
+                        sh """
+                            if ! eksctl get cluster --name ${env.CLUSTER_NAME} --region ${env.AWS_REGION}; then
+                                eksctl create cluster --name ${env.CLUSTER_NAME} --region ${env.AWS_REGION} --nodegroup-name standard-workers --node-type t3.medium --nodes 2 --nodes-min 1 --nodes-max 3 --managed
+                            fi
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Deploy Application with Helm') {
+            steps {
+                withCredentials([aws(credentialsId: env.AWS_CREDENTIALS_ID)]) {
+                    script {
+                        sh """
+                            aws eks --region ${env.AWS_REGION} update-kubeconfig --name ${env.CLUSTER_NAME}
+                            helm repo add stable https://charts.helm.sh/stable
+                            helm repo update
+                            helm upgrade --install mern-app ./mernAPP --set image.repository=${env.ECR_REPO_URI}/sukhil/mern,image.tag=latest
+                        """
+                    }
                 }
             }
         }

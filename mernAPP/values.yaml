@@ -1,0 +1,10 @@
+helloService:
+  image: public.ecr.aws/b4e0x1f6/sukhil/mern:latest
+  port: 3001
+
+profileService:
+  image: public.ecr.aws/b4e0x1f6/sukhil/mern:latest
+  port: 3002
+
+frontend:
+  image: public.ecr.aws/b4e0x1f6/sukhil/mern:latest
