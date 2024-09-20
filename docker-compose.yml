@@ -16,8 +16,7 @@ services:
     network_mode: host
     environment:
       - PORT=3002
-      - MONGO_URL=<MongoDB URI>
-
+      - MONGO_URL=
   frontend:
     container_name: frontend
     image: sukhil-learning:my-app
